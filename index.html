@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abhi QR Code Generator</title>
+    <style>
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(45deg, #ff758c, #ff7eb3, #89ff7f, #89fff0);
+            background-size: 300% 300%;
+            animation: gradientMove 6s ease infinite;
+        }
+
+        .container {
+            text-align: center;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;  /* Minimized spacing between input and button */
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        button {
+            background-color: black;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #333;
+        }
+
+        #qrcode {
+            padding: 20px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            margin-top: 10px;  /* Eliminated spacing between button and QR code */
+            margin-bottom: 20px;
+        }
+
+        .download-links {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        a {
+            text-decoration: none;
+            color: white;
+            background-color: black;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        a:hover {
+            background-color: #333;
+        }
+
+        #error {
+            color: red;
+            margin-bottom: 10px;  /* Reduced error spacing */
+        }
+
+        .qr-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Personal QR Generator</h1>
+        <p>Enter a valid URL: </p>
+        <input type="text" id="url" placeholder="Enter URL">
+        <button id="generate">Generate QR Code</button>
+        <div id="error"></div>
+        <div class="qr-container">
+            <div id="qrcode"></div>
+        </div>
+        <div class="download-links">
+            <a id="download-png" download="qrcode.png" style="display: none;">Download PNG</a>
+            <a id="download-jpg" download="qrcode.jpg" style="display: none;">Download JPG</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        const generateButton = document.getElementById('generate');
+        const downloadPngLink = document.getElementById('download-png');
+        const downloadJpgLink = document.getElementById('download-jpg');
+        const qrcodeContainer = document.getElementById('qrcode');
+        const errorContainer = document.getElementById('error');
+
+        function isValidURL(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function generateQRCode(url) {
+            qrcodeContainer.innerHTML = '';  // Clear previous QR code
+
+            const qrCode = new QRCode(qrcodeContainer, {
+                text: url,
+                width: 128,
+                height: 128,
+            });
+
+            // Create PNG download
+            setTimeout(() => {
+                const qrCanvas = qrcodeContainer.querySelector('canvas');
+                const pngDataUrl = qrCanvas.toDataURL('image/png');
+                
+                downloadPngLink.href = pngDataUrl;
+                downloadPngLink.style.display = 'inline-block';  // Show PNG download link
+
+                // Create JPG with white card background and rounded corners
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                const cardWidth = 200;
+                const cardHeight = 200;
+                const radius = 12;
+                canvas.width = cardWidth;
+                canvas.height = cardHeight;
+
+                // Draw rounded rectangle (white background)
+                context.fillStyle = 'white';
+                context.beginPath();
+                context.moveTo(radius, 0);
+                context.arcTo(cardWidth, 0, cardWidth, cardHeight, radius);
+                context.arcTo(cardWidth, cardHeight, 0, cardHeight, radius);
+                context.arcTo(0, cardHeight, 0, 0, radius);
+                context.arcTo(0, 0, cardWidth, 0, radius);
+                context.closePath();
+                context.fill();
+
+                // Draw QR code in the middle of the card
+                context.drawImage(qrCanvas, (cardWidth - 128) / 2, (cardHeight - 128) / 2, 128, 128);
+
+                const jpgDataUrl = canvas.toDataURL('image/jpeg');
+                downloadJpgLink.href = jpgDataUrl;
+                downloadJpgLink.style.display = 'inline-block';  // Show JPG download link
+            }, 300);  // Delay to allow QR code generation
+        }
+
+        generateButton.addEventListener('click', function() {
+            let url = document.getElementById('url').value.trim();
+            errorContainer.textContent = '';  // Clear any previous errors
+
+            // Add 'http://' if missing
+            if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'http://' + url;
+            }
+
+            // Validate URL
+            if (!isValidURL(url)) {
+                errorContainer.textContent = 'Please enter a valid URL.';
+                return;
+            }
+
+            generateQRCode(url);
+        });
+    </script>
+
+</body>
+</html>
