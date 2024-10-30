@@ -25,3 +25,8 @@ This project is entirely **open-source**, and we welcome contributors from all b
    ```bash
    git clone https://github.com/your-username/abhi-qr-code-generator.git
    cd abhi-qr-code-generator
+
+2. Enter the url of the website you need to generate QR Code
+3. Mission complete!!!
+
+```
