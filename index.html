@@ -10,7 +10,7 @@
                 background-position: 0% 50%;
             }
             100% {
-                background-position: 200% 50%; /* Continuously loops without abrupt cuts */
+                background-position: 200% 50%;
             }
         }
 
@@ -24,11 +24,10 @@
             margin: 0;
             background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
             background-size: 400% 400%;
-            animation: gradientMove 50s ease infinite; /* Slowed down for smoother transition */
+            animation: gradientMove 50s ease infinite;
             position: relative;
         }
 
-        /* Noise overlay */
         body::before {
             content: "";
             position: absolute;
@@ -49,7 +48,7 @@
             max-width: 90%;
             width: 100%;
             z-index: 1;
-            overflow: hidden; /* Prevents content from overflowing */
+            overflow: hidden;
         }
 
         input[type="text"] {
@@ -58,7 +57,7 @@
             margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 8px;
-            box-sizing: border-box; /* Prevents input from overflowing container */
+            box-sizing: border-box;
         }
 
         button {
@@ -76,7 +75,7 @@
         }
 
         #qrcode {
-            display: none; /* Initially hidden */
+            display: none;
             padding: 20px;
             background-color: white;
             border-radius: 12px;
@@ -85,7 +84,7 @@
         }
 
         .download-links {
-            display: none; /* Hidden until QR code is generated */
+            display: none;
             gap: 10px;
             justify-content: center;
         }
@@ -150,6 +149,7 @@
     const qrcodeContainer = document.getElementById('qrcode');
     const errorContainer = document.getElementById('error');
     const downloadLinks = document.querySelector('.download-links');
+    const urlInput = document.getElementById('url');
 
     function isValidURL(string) {
         try {
@@ -161,7 +161,7 @@
     }
 
     function generateQRCode(url) {
-        qrcodeContainer.innerHTML = '';  // Clear previous QR code
+        qrcodeContainer.innerHTML = '';
 
         const qrCode = new QRCode(qrcodeContainer, {
             text: url,
@@ -169,19 +169,16 @@
             height: 128,
         });
 
-        // Show the QR code container and download links
         qrcodeContainer.style.display = 'block';
         downloadLinks.style.display = 'flex';
 
-        // Create PNG download
         setTimeout(() => {
             const qrCanvas = qrcodeContainer.querySelector('canvas');
             const pngDataUrl = qrCanvas.toDataURL('image/png');
 
             downloadPngLink.href = pngDataUrl;
-            downloadPngLink.style.display = 'inline-block';  // Show PNG download link
+            downloadPngLink.style.display = 'inline-block';
 
-            // Create JPG with white card background and rounded corners
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
             const cardWidth = 200;
@@ -190,7 +187,6 @@
             canvas.width = cardWidth;
             canvas.height = cardHeight;
 
-            // Draw rounded rectangle (white background)
             context.fillStyle = 'white';
             context.beginPath();
             context.moveTo(radius, 0);
@@ -201,31 +197,36 @@
             context.closePath();
             context.fill();
 
-            // Draw QR code in the middle of the card
             context.drawImage(qrCanvas, (cardWidth - 128) / 2, (cardHeight - 128) / 2, 128, 128);
 
             const jpgDataUrl = canvas.toDataURL('image/jpeg');
             downloadJpgLink.href = jpgDataUrl;
-            downloadJpgLink.style.display = 'inline-block';  // Show JPG download link
-        }, 300);  // Delay to allow QR code generation
+            downloadJpgLink.style.display = 'inline-block';
+        }, 300);
     }
 
-    generateButton.addEventListener('click', function() {
-        let url = document.getElementById('url').value.trim();
-        errorContainer.textContent = '';  // Clear any previous errors
+    function handleGenerateClick() {
+        let url = urlInput.value.trim();
+        errorContainer.textContent = '';
 
-        // Add 'http://' if missing
         if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
             url = 'http://' + url;
         }
 
-        // Validate URL
         if (!isValidURL(url)) {
             errorContainer.textContent = 'Please enter a valid URL.';
             return;
         }
 
         generateQRCode(url);
+    }
+
+    generateButton.addEventListener('click', handleGenerateClick);
+
+    urlInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            handleGenerateClick();
+        }
     });
 </script>
 
