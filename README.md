@@ -28,5 +28,5 @@ This project is entirely **open-source**, and we welcome contributors from all b
 
 2. Enter the url of the website you need to generate QR Code
 3. Mission complete!!!
-
 ```
+Visit site here: https://personal-qr-generator-three.vercel.app/
