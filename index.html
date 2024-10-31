@@ -48,6 +48,7 @@
             max-width: 90%;
             width: 100%;
             z-index: 1;
+            overflow: hidden; /* Prevents content from overflowing */
         }
 
         input[type="text"] {
@@ -144,6 +145,7 @@
     const qrcodeContainer = document.getElementById('qrcode');
     const errorContainer = document.getElementById('error');
     const downloadLinks = document.querySelector('.download-links');
+    const urlInput = document.getElementById('url');
 
     function isValidURL(string) {
         try {
@@ -198,7 +200,6 @@
             downloadJpgLink.style.display = 'inline-block';
         }, 300);
     }
-
     function handleQRCodeGeneration() {
         let url = document.getElementById('url').value.trim();
         errorContainer.textContent = '';
