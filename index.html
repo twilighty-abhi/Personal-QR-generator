@@ -48,7 +48,7 @@
             max-width: 90%;
             width: 100%;
             z-index: 1;
-            overflow: hidden;
+            overflow: hidden; /* Prevents content from overflowing */
         }
 
         input[type="text"] {
@@ -117,10 +117,6 @@
             .container {
                 max-width: 400px;
             }
-
-            button {
-                width: auto;
-            }
         }
     </style>
 </head>
@@ -128,7 +124,7 @@
 
 <div class="container">
     <h1>Personal QR Generator</h1>
-    <p>Enter a valid URL: </p>
+    <p>Enter a valid URL:</p>
     <input type="text" id="url" placeholder="Enter URL">
     <button id="generate">Generate QR Code</button>
     <div id="error"></div>
@@ -204,9 +200,8 @@
             downloadJpgLink.style.display = 'inline-block';
         }, 300);
     }
-
-    function handleGenerateClick() {
-        let url = urlInput.value.trim();
+    function handleQRCodeGeneration() {
+        let url = document.getElementById('url').value.trim();
         errorContainer.textContent = '';
 
         if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
@@ -221,11 +216,12 @@
         generateQRCode(url);
     }
 
-    generateButton.addEventListener('click', handleGenerateClick);
+    generateButton.addEventListener('click', handleQRCodeGeneration);
 
-    urlInput.addEventListener('keydown', function(event) {
+    document.getElementById('url').addEventListener('keydown', function(event) {
         if (event.key === 'Enter') {
-            handleGenerateClick();
+            event.preventDefault();
+            handleQRCodeGeneration();
         }
     });
 </script>
