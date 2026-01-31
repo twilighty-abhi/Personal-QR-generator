@@ -18,9 +18,9 @@
 
 const CONFIG = {
   MAX_HISTORY: 15,
-  DEFAULT_SIZE: 256,
-  MIN_SIZE: 128,
-  MAX_SIZE: 512,
+  DEFAULT_SIZE: 512,
+  MIN_SIZE: 256,
+  MAX_SIZE: 1024,
   DEFAULT_FG: '#1a1a2e',
   DEFAULT_BG: '#ffffff',
   ERROR_LEVELS: ['L', 'M', 'Q', 'H'],
@@ -647,36 +647,72 @@ function downloadPNG() {
   const canvas = document.querySelector('#qrcode canvas');
   if (!canvas) return;
   
+  // Create high-resolution version (2x upscale with padding)
+  const downloadCanvas = document.createElement('canvas');
+  const scale = 2;
+  const padding = 40;
+  
+  downloadCanvas.width = (canvas.width + padding * 2) * scale;
+  downloadCanvas.height = (canvas.height + padding * 2) * scale;
+  
+  const ctx = downloadCanvas.getContext('2d', { alpha: false });
+  ctx.imageSmoothingEnabled = false;
+  
+  // Background with padding
+  ctx.fillStyle = state.customization.bgColor;
+  ctx.fillRect(0, 0, downloadCanvas.width, downloadCanvas.height);
+  
+  // Draw QR at 2x scale
+  ctx.drawImage(
+    canvas,
+    padding * scale,
+    padding * scale,
+    canvas.width * scale,
+    canvas.height * scale
+  );
+  
   const link = document.createElement('a');
-  link.download = `qrcode-${Date.now()}.png`;
-  link.href = canvas.toDataURL('image/png', 1.0);
+  link.download = `qrcode-hq-${Date.now()}.png`;
+  link.href = downloadCanvas.toDataURL('image/png', 1.0);
   link.click();
   
-  showToast('PNG downloaded!', 'success');
+  showToast('High-quality PNG downloaded!', 'success');
 }
 
 function downloadJPG() {
   const canvas = document.querySelector('#qrcode canvas');
   if (!canvas) return;
   
-  // Create new canvas with white background
-  const newCanvas = document.createElement('canvas');
-  const padding = 20;
-  newCanvas.width = canvas.width + padding * 2;
-  newCanvas.height = canvas.height + padding * 2;
+  // Create high-resolution version (2x upscale with padding)
+  const downloadCanvas = document.createElement('canvas');
+  const scale = 2;
+  const padding = 40;
   
-  const ctx = newCanvas.getContext('2d', { alpha: false });
+  downloadCanvas.width = (canvas.width + padding * 2) * scale;
+  downloadCanvas.height = (canvas.height + padding * 2) * scale;
+  
+  const ctx = downloadCanvas.getContext('2d', { alpha: false });
   ctx.imageSmoothingEnabled = false;
+  
+  // Background with padding
   ctx.fillStyle = state.customization.bgColor;
-  ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
-  ctx.drawImage(canvas, padding, padding);
+  ctx.fillRect(0, 0, downloadCanvas.width, downloadCanvas.height);
+  
+  // Draw QR at 2x scale
+  ctx.drawImage(
+    canvas,
+    padding * scale,
+    padding * scale,
+    canvas.width * scale,
+    canvas.height * scale
+  );
   
   const link = document.createElement('a');
-  link.download = `qrcode-${Date.now()}.jpg`;
-  link.href = newCanvas.toDataURL('image/jpeg', 1.0);
+  link.download = `qrcode-hq-${Date.now()}.jpg`;
+  link.href = downloadCanvas.toDataURL('image/jpeg', 1.0);
   link.click();
   
-  showToast('JPG downloaded!', 'success');
+  showToast('High-quality JPG downloaded!', 'success');
 }
 
 function downloadSVG() {
