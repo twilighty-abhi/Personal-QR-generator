@@ -3,7 +3,7 @@
  * A feature-rich, premium QR code generator
  * 
  * Features:
- * - Multiple QR types (URL, Text, WiFi, vCard, Email, Phone, SMS)
+ * - Multiple QR types (URL, Text, WiFi, vCard, Email, Phone)
  * - Customizable colors, size, and error correction
  * - Logo embedding support
  * - Dark/Light theme
@@ -157,23 +157,6 @@ const QRDataGenerators = {
     }
     
     return { data: `tel:${number}`, display: number };
-  },
-  
-  sms: () => {
-    const number = document.getElementById('sms-number').value.trim();
-    const message = document.getElementById('sms-message').value.trim();
-    
-    if (!number) {
-      showToast('Please enter a phone number', 'error');
-      return null;
-    }
-    
-    let smsUri = `sms:${number}`;
-    if (message) {
-      smsUri += `?body=${encodeURIComponent(message)}`;
-    }
-    
-    return { data: smsUri, display: number };
   }
 };
 
@@ -681,10 +664,6 @@ function setInputForType(type, data) {
     case 'email':
       const emailMatch = data.match(/mailto:([^?]+)/);
       if (emailMatch) document.getElementById('email-address').value = emailMatch[1];
-      break;
-    case 'sms':
-      const smsMatch = data.match(/sms:([^?]+)/);
-      if (smsMatch) document.getElementById('sms-number').value = smsMatch[1];
       break;
     // WiFi and vCard are complex, just show toast
     case 'wifi':
