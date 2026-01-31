@@ -903,7 +903,7 @@ function generateShareableLink() {
 
 function loadFromURL() {
   const params = new URLSearchParams(window.location.search);
-  if (!params.has('type')) return;
+  if (!params.has('type')) return false;
   
   try {
     // Load customization from URL
@@ -942,8 +942,10 @@ function loadFromURL() {
     setInputForType(type, data);
     
     showToast('QR code loaded from link!', 'success');
+    return true; // Data was loaded
   } catch (error) {
     console.error('URL load error:', error);
+    return false;
   }
 }
 
@@ -1221,7 +1223,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initKeyboardShortcuts();
   
   // Load from URL if parameters present
-  loadFromURL();
+  const hasURLData = loadFromURL();
+  
+  // Auto-generate QR if data was loaded from URL
+  if (hasURLData) {
+    setTimeout(() => generateQRCode(), 300);
+  }
   
   // Event Listeners
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
