@@ -39,9 +39,7 @@ const state = {
     errorLevel: 'H', // High error correction for logo support
     logo: null,
     logoSize: 20, // Logo size as percentage (max 28% for scanability)
-    pattern: 'classic', // QR pattern style
-    gradientEnabled: false,
-    gradientColor: '#667eea'
+    pattern: 'classic' // QR pattern style
   },
   history: [],
   currentData: null,
@@ -266,30 +264,6 @@ function initCustomization() {
     });
   }
   
-  // Gradient toggle
-  const gradientCheckbox = document.getElementById('gradient-enabled');
-  const gradientControls = document.getElementById('gradient-controls');
-  const gradientColor = document.getElementById('gradient-color');
-  const gradientValue = document.getElementById('gradient-value');
-  
-  if (gradientCheckbox) {
-    gradientCheckbox.addEventListener('change', (e) => {
-      state.customization.gradientEnabled = e.target.checked;
-      if (gradientControls) {
-        gradientControls.style.display = e.target.checked ? 'block' : 'none';
-      }
-    });
-  }
-  
-  if (gradientColor) {
-    gradientColor.addEventListener('input', (e) => {
-      state.customization.gradientColor = e.target.value;
-      if (gradientValue) {
-        gradientValue.textContent = e.target.value.toUpperCase();
-      }
-    });
-  }
-  
   // Logo upload
   const logoInput = document.getElementById('logo-input');
   const logoArea = document.getElementById('logo-upload-area');
@@ -498,14 +472,7 @@ function applyQRPattern(qrSize) {
   const newCtx = newCanvas.getContext('2d');
   
   // Fill background
-  if (state.customization.gradientEnabled) {
-    const gradient = newCtx.createLinearGradient(0, 0, qrSize, qrSize);
-    gradient.addColorStop(0, state.customization.fgColor);
-    gradient.addColorStop(1, state.customization.gradientColor);
-    newCtx.fillStyle = gradient;
-  } else {
-    newCtx.fillStyle = state.customization.bgColor;
-  }
+  newCtx.fillStyle = state.customization.bgColor;
   newCtx.fillRect(0, 0, qrSize, qrSize);
   
   // Analyze QR code to find modules
@@ -524,14 +491,7 @@ function applyQRPattern(qrSize) {
   }
   
   // Apply pattern style
-  if (state.customization.gradientEnabled) {
-    const gradient = newCtx.createLinearGradient(0, 0, qrSize, qrSize);
-    gradient.addColorStop(0, state.customization.fgColor);
-    gradient.addColorStop(1, state.customization.gradientColor);
-    newCtx.fillStyle = gradient;
-  } else {
-    newCtx.fillStyle = state.customization.fgColor;
-  }
+  newCtx.fillStyle = state.customization.fgColor;
   
   modules.forEach(module => {
     switch (pattern) {
@@ -625,10 +585,6 @@ function loadTemplate(templateId) {
   document.getElementById('logo-size').value = state.customization.logoSize;
   document.getElementById('logo-size-value').textContent = `${state.customization.logoSize}%`;
   document.getElementById('qr-style').value = state.customization.pattern;
-  document.getElementById('gradient-enabled').checked = state.customization.gradientEnabled;
-  document.getElementById('gradient-color').value = state.customization.gradientColor;
-  document.getElementById('gradient-value').textContent = state.customization.gradientColor.toUpperCase();
-  document.getElementById('gradient-controls').style.display = state.customization.gradientEnabled ? 'block' : 'none';
   
   showToast(`Template "${template.name}" loaded!`, 'success');
   
@@ -875,9 +831,7 @@ function generateShareableLink() {
       fg: state.customization.fgColor,
       bg: state.customization.bgColor,
       size: state.customization.size,
-      pattern: state.customization.pattern,
-      gradient: state.customization.gradientEnabled ? '1' : '0',
-      gradientColor: state.customization.gradientColor
+      pattern: state.customization.pattern
     });
     
     const shareUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
@@ -911,8 +865,6 @@ function loadFromURL() {
     if (params.has('bg')) state.customization.bgColor = params.get('bg');
     if (params.has('size')) state.customization.size = parseInt(params.get('size'));
     if (params.has('pattern')) state.customization.pattern = params.get('pattern');
-    if (params.has('gradient')) state.customization.gradientEnabled = params.get('gradient') === '1';
-    if (params.has('gradientColor')) state.customization.gradientColor = params.get('gradientColor');
     
     // Update UI
     document.getElementById('qr-size').value = state.customization.size;
@@ -922,10 +874,6 @@ function loadFromURL() {
     document.getElementById('bg-color').value = state.customization.bgColor;
     document.getElementById('bg-value').textContent = state.customization.bgColor.toUpperCase();
     document.getElementById('qr-style').value = state.customization.pattern;
-    document.getElementById('gradient-enabled').checked = state.customization.gradientEnabled;
-    document.getElementById('gradient-color').value = state.customization.gradientColor;
-    document.getElementById('gradient-value').textContent = state.customization.gradientColor.toUpperCase();
-    document.getElementById('gradient-controls').style.display = state.customization.gradientEnabled ? 'block' : 'none';
     
     // Switch to correct tab
     const type = params.get('type');
@@ -1257,9 +1205,7 @@ document.addEventListener('DOMContentLoaded', () => {
         errorLevel: 'H',
         logo: state.customization.logo,
         logoSize: 20,
-        pattern: 'classic',
-        gradientEnabled: false,
-        gradientColor: '#667eea'
+        pattern: 'classic'
       };
       
       // Update UI
@@ -1272,8 +1218,6 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('logo-size').value = 20;
       document.getElementById('logo-size-value').textContent = '20%';
       document.getElementById('qr-style').value = 'classic';
-      document.getElementById('gradient-enabled').checked = false;
-      document.getElementById('gradient-controls').style.display = 'none';
       
       showToast('Default template loaded!', 'success');
     });

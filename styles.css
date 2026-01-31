@@ -1318,12 +1318,6 @@ body {
   box-shadow: 2px 2px 0px var(--border-color);
 }
 
-.gradient-controls {
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 2px dashed var(--border-color);
-}
-
 /* Copy Button - Special */
 .copy-btn {
   grid-column: span 2;
