@@ -25,7 +25,8 @@ const CONFIG = {
   DEFAULT_BG: '#ffffff',
   ERROR_LEVELS: ['L', 'M', 'Q', 'H'],
   STORAGE_KEY: 'qr_generator_history',
-  THEME_KEY: 'qr_generator_theme'
+  THEME_KEY: 'qr_generator_theme',
+  TEMPLATES_KEY: 'qr_generator_templates'
 };
 
 const state = {
@@ -37,10 +38,14 @@ const state = {
     bgColor: CONFIG.DEFAULT_BG,
     errorLevel: 'H', // High error correction for logo support
     logo: null,
-    logoSize: 20 // Logo size as percentage (max 28% for scanability)
+    logoSize: 20, // Logo size as percentage (max 28% for scanability)
+    pattern: 'classic', // QR pattern style
+    gradientEnabled: false,
+    gradientColor: '#667eea'
   },
   history: [],
-  currentData: null
+  currentData: null,
+  templates: []
 };
 
 // ============================================
@@ -253,6 +258,38 @@ function initCustomization() {
     });
   }
   
+  // QR Pattern style
+  const qrStyleSelect = document.getElementById('qr-style');
+  if (qrStyleSelect) {
+    qrStyleSelect.addEventListener('change', (e) => {
+      state.customization.pattern = e.target.value;
+    });
+  }
+  
+  // Gradient toggle
+  const gradientCheckbox = document.getElementById('gradient-enabled');
+  const gradientControls = document.getElementById('gradient-controls');
+  const gradientColor = document.getElementById('gradient-color');
+  const gradientValue = document.getElementById('gradient-value');
+  
+  if (gradientCheckbox) {
+    gradientCheckbox.addEventListener('change', (e) => {
+      state.customization.gradientEnabled = e.target.checked;
+      if (gradientControls) {
+        gradientControls.style.display = e.target.checked ? 'block' : 'none';
+      }
+    });
+  }
+  
+  if (gradientColor) {
+    gradientColor.addEventListener('input', (e) => {
+      state.customization.gradientColor = e.target.value;
+      if (gradientValue) {
+        gradientValue.textContent = e.target.value.toUpperCase();
+      }
+    });
+  }
+  
   // Logo upload
   const logoInput = document.getElementById('logo-input');
   const logoArea = document.getElementById('logo-upload-area');
@@ -329,12 +366,15 @@ function generateQRCode() {
         if (imgEl) {
           imgEl.style.display = 'none';
         }
+        
+        // Apply pattern customization
+        applyQRPattern(qrSize);
+        
+        // Add logo if present
+        if (state.customization.logo) {
+          setTimeout(() => addLogoToQR(qrSize), 100);
+        }
       }, 100);
-      
-      // Add logo if present - wait for QR to render fully
-      if (state.customization.logo) {
-        setTimeout(() => addLogoToQR(qrSize), 300);
-      }
       
       // Update UI
       document.querySelector('.qr-display').classList.remove('empty');
@@ -437,11 +477,213 @@ function addLogoToQR(qrSize) {
 }
 
 // ============================================
+// QR Pattern Customization
+// ============================================
+
+function applyQRPattern(qrSize) {
+  const canvas = document.querySelector('#qrcode canvas');
+  if (!canvas) return;
+  
+  const pattern = state.customization.pattern;
+  if (pattern === 'classic') return; // No modification needed
+  
+  const ctx = canvas.getContext('2d');
+  const imageData = ctx.getImageData(0, 0, qrSize, qrSize);
+  const data = imageData.data;
+  
+  // Create a new canvas for the styled QR
+  const newCanvas = document.createElement('canvas');
+  newCanvas.width = qrSize;
+  newCanvas.height = qrSize;
+  const newCtx = newCanvas.getContext('2d');
+  
+  // Fill background
+  if (state.customization.gradientEnabled) {
+    const gradient = newCtx.createLinearGradient(0, 0, qrSize, qrSize);
+    gradient.addColorStop(0, state.customization.fgColor);
+    gradient.addColorStop(1, state.customization.gradientColor);
+    newCtx.fillStyle = gradient;
+  } else {
+    newCtx.fillStyle = state.customization.bgColor;
+  }
+  newCtx.fillRect(0, 0, qrSize, qrSize);
+  
+  // Analyze QR code to find modules
+  const moduleSize = Math.floor(qrSize / 33); // Approximate module count
+  const modules = [];
+  
+  for (let y = 0; y < qrSize; y += moduleSize) {
+    for (let x = 0; x < qrSize; x += moduleSize) {
+      const i = (y * qrSize + x) * 4;
+      const isDark = data[i] < 128; // Check if pixel is dark
+      
+      if (isDark) {
+        modules.push({ x, y, size: moduleSize });
+      }
+    }
+  }
+  
+  // Apply pattern style
+  if (state.customization.gradientEnabled) {
+    const gradient = newCtx.createLinearGradient(0, 0, qrSize, qrSize);
+    gradient.addColorStop(0, state.customization.fgColor);
+    gradient.addColorStop(1, state.customization.gradientColor);
+    newCtx.fillStyle = gradient;
+  } else {
+    newCtx.fillStyle = state.customization.fgColor;
+  }
+  
+  modules.forEach(module => {
+    switch (pattern) {
+      case 'rounded':
+        newCtx.beginPath();
+        newCtx.roundRect(module.x, module.y, module.size, module.size, module.size * 0.3);
+        newCtx.fill();
+        break;
+      case 'dots':
+        newCtx.beginPath();
+        newCtx.arc(
+          module.x + module.size / 2,
+          module.y + module.size / 2,
+          module.size / 2,
+          0,
+          Math.PI * 2
+        );
+        newCtx.fill();
+        break;
+      case 'brutal':
+        // Brutal style with thicker borders
+        newCtx.fillRect(module.x, module.y, module.size, module.size);
+        newCtx.strokeStyle = state.customization.bgColor;
+        newCtx.lineWidth = 2;
+        newCtx.strokeRect(module.x, module.y, module.size, module.size);
+        break;
+      default:
+        newCtx.fillRect(module.x, module.y, module.size, module.size);
+    }
+  });
+  
+  // Replace original canvas with styled canvas
+  ctx.clearRect(0, 0, qrSize, qrSize);
+  ctx.drawImage(newCanvas, 0, 0);
+}
+
+// ============================================
+// Templates Management
+// ============================================
+
+function loadTemplates() {
+  try {
+    const saved = localStorage.getItem(CONFIG.TEMPLATES_KEY);
+    state.templates = saved ? JSON.parse(saved) : [];
+    renderTemplates();
+  } catch (error) {
+    console.error('Error loading templates:', error);
+    state.templates = [];
+  }
+}
+
+function saveTemplates() {
+  try {
+    localStorage.setItem(CONFIG.TEMPLATES_KEY, JSON.stringify(state.templates));
+  } catch (error) {
+    console.error('Error saving templates:', error);
+  }
+}
+
+function saveTemplate() {
+  const name = prompt('Enter a name for this template:');
+  if (!name) return;
+  
+  const template = {
+    id: Date.now(),
+    name,
+    customization: { ...state.customization, logo: null } // Don't save logo data
+  };
+  
+  state.templates.push(template);
+  saveTemplates();
+  renderTemplates();
+  showToast(`Template "${name}" saved!`, 'success');
+}
+
+function loadTemplate(templateId) {
+  const template = state.templates.find(t => t.id === templateId);
+  if (!template) return;
+  
+  // Apply template customization (except logo)
+  const logo = state.customization.logo;
+  state.customization = { ...template.customization, logo };
+  
+  // Update UI controls
+  document.getElementById('qr-size').value = state.customization.size;
+  document.getElementById('size-value').textContent = `${state.customization.size}px`;
+  document.getElementById('fg-color').value = state.customization.fgColor;
+  document.getElementById('fg-value').textContent = state.customization.fgColor.toUpperCase();
+  document.getElementById('bg-color').value = state.customization.bgColor;
+  document.getElementById('bg-value').textContent = state.customization.bgColor.toUpperCase();
+  document.getElementById('logo-size').value = state.customization.logoSize;
+  document.getElementById('logo-size-value').textContent = `${state.customization.logoSize}%`;
+  document.getElementById('qr-style').value = state.customization.pattern;
+  document.getElementById('gradient-enabled').checked = state.customization.gradientEnabled;
+  document.getElementById('gradient-color').value = state.customization.gradientColor;
+  document.getElementById('gradient-value').textContent = state.customization.gradientColor.toUpperCase();
+  document.getElementById('gradient-controls').style.display = state.customization.gradientEnabled ? 'block' : 'none';
+  
+  showToast(`Template "${template.name}" loaded!`, 'success');
+  
+  // Auto-generate QR if there's existing data
+  if (state.currentData) {
+    setTimeout(() => generateQRCode(), 100);
+  }
+}
+
+function deleteTemplate(templateId) {
+  if (!confirm('Delete this template?')) return;
+  
+  state.templates = state.templates.filter(t => t.id !== templateId);
+  saveTemplates();
+  renderTemplates();
+  showToast('Template deleted', 'success');
+}
+
+function renderTemplates() {
+  const container = document.getElementById('templates-list');
+  if (!container) return;
+  
+  // Keep default template button
+  const defaultBtn = container.querySelector('.template-default');
+  container.innerHTML = '';
+  if (defaultBtn) container.appendChild(defaultBtn);
+  
+  state.templates.forEach(template => {
+    const btn = document.createElement('button');
+    btn.className = 'template-item';
+    btn.innerHTML = `
+      <span class="template-name">${escapeHtml(template.name)}</span>
+      <span class="template-preview" style="background: ${template.customization.fgColor};"></span>
+      <button class="template-delete" data-id="${template.id}" title="Delete template">&times;</button>
+    `;
+    
+    btn.addEventListener('click', (e) => {
+      if (e.target.classList.contains('template-delete')) {
+        e.stopPropagation();
+        deleteTemplate(template.id);
+      } else {
+        loadTemplate(template.id);
+      }
+    });
+    
+    container.appendChild(btn);
+  });
+}
+
+// ============================================
 // Download Functions
 // ============================================
 
 function enableDownloadButtons() {
-  const buttons = document.querySelectorAll('.download-btn');
+  const buttons = document.querySelectorAll('.download-btn, .share-btn');
   buttons.forEach(btn => btn.removeAttribute('disabled'));
 }
 
@@ -506,6 +748,52 @@ function downloadSVG() {
   showToast('SVG downloaded!', 'success');
 }
 
+function downloadPDF() {
+  const canvas = document.querySelector('#qrcode canvas');
+  if (!canvas) return;
+  
+  try {
+    // Create a simple PDF using SVG embedded in HTML
+    const size = state.customization.size;
+    const dataUrl = canvas.toDataURL('image/png');
+    
+    // Create HTML for PDF with proper sizing
+    const pdfContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>QR Code</title>
+  <style>
+    body { margin: 0; padding: 20px; text-align: center; font-family: Arial, sans-serif; }
+    .qr-container { display: inline-block; padding: 30px; background: white; border: 3px solid black; }
+    img { display: block; width: ${size}px; height: ${size}px; }
+    .info { margin-top: 20px; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="qr-container">
+    <img src="${dataUrl}" alt="QR Code">
+    <div class="info">Generated by QR Generator Pro</div>
+  </div>
+</body>
+</html>`;
+    
+    // Create blob and download
+    const blob = new Blob([pdfContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.download = `qrcode-${Date.now()}.html`;
+    link.href = url;
+    link.click();
+    URL.revokeObjectURL(url);
+    
+    showToast('Print-ready HTML downloaded! Open and print to PDF.', 'success');
+  } catch (error) {
+    console.error('PDF export error:', error);
+    showToast('Failed to export PDF', 'error');
+  }
+}
+
 async function copyToClipboard() {
   const canvas = document.querySelector('#qrcode canvas');
   if (!canvas) return;
@@ -530,6 +818,206 @@ async function copyToClipboard() {
   } catch (error) {
     console.error('Copy failed:', error);
     showToast('Failed to copy. Try downloading instead.', 'error');
+  }
+}
+
+// ============================================
+// Sharing Functions
+// ============================================
+
+async function shareOnX() {
+  const canvas = document.querySelector('#qrcode canvas');
+  if (!canvas) {
+    showToast('Generate a QR code first!', 'error');
+    return;
+  }
+  
+  try {
+    // Try Web Share API with image
+    if (navigator.share && navigator.canShare) {
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      const file = new File([blob], 'qrcode.png', { type: 'image/png' });
+      const shareData = {
+        title: 'QR Code',
+        text: 'Check out my custom QR code created with QR Generator Pro!',
+        files: [file]
+      };
+      
+      if (navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        showToast('Shared successfully!', 'success');
+        return;
+      }
+    }
+    
+    // Fallback: download and open X
+    downloadPNG();
+    const text = 'Check out my custom QR code created with QR Generator Pro!';
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    setTimeout(() => {
+      window.open(url, '_blank', 'width=600,height=400');
+      showToast('QR downloaded! Upload it to your X post.', 'success');
+    }, 500);
+  } catch (error) {
+    console.error('Share failed:', error);
+    showToast('Download the QR and share manually on X', 'error');
+  }
+}
+
+async function shareOnInstagram() {
+  const canvas = document.querySelector('#qrcode canvas');
+  if (!canvas) {
+    showToast('Generate a QR code first!', 'error');
+    return;
+  }
+  
+  try {
+    // Try Web Share API (works on mobile)
+    if (navigator.share && navigator.canShare) {
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      const file = new File([blob], 'qrcode.png', { type: 'image/png' });
+      const shareData = {
+        title: 'QR Code',
+        text: 'Check out my custom QR code!',
+        files: [file]
+      };
+      
+      if (navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        showToast('Shared successfully!', 'success');
+        return;
+      }
+    }
+    
+    // Fallback: auto-download
+    downloadPNG();
+    showToast('QR downloaded! Now share it on Instagram from your gallery.', 'success');
+  } catch (error) {
+    console.error('Share failed:', error);
+    downloadPNG();
+    showToast('QR downloaded! Share it on Instagram from your gallery.', 'info');
+  }
+}
+
+async function shareOnWhatsApp() {
+  const canvas = document.querySelector('#qrcode canvas');
+  if (!canvas) {
+    showToast('Generate a QR code first!', 'error');
+    return;
+  }
+  
+  try {
+    // Try Web Share API with image
+    if (navigator.share && navigator.canShare) {
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      const file = new File([blob], 'qrcode.png', { type: 'image/png' });
+      const shareData = {
+        title: 'QR Code',
+        text: 'Check out my custom QR code!',
+        files: [file]
+      };
+      
+      if (navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        showToast('Shared successfully!', 'success');
+        return;
+      }
+    }
+    
+    // Fallback: download and open WhatsApp Web
+    downloadPNG();
+    const text = 'Check out my custom QR code!';
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    setTimeout(() => {
+      window.open(url, '_blank', 'width=600,height=400');
+      showToast('QR downloaded! Attach it in WhatsApp.', 'success');
+    }, 500);
+  } catch (error) {
+    console.error('Share failed:', error);
+    showToast('Download the QR and share manually on WhatsApp', 'error');
+  }
+}
+
+function generateShareableLink() {
+  if (!state.currentData) return;
+  
+  try {
+    // Create a shareable link with encoded QR parameters
+    const params = new URLSearchParams({
+      type: state.currentData.type,
+      data: state.currentData.data,
+      fg: state.customization.fgColor,
+      bg: state.customization.bgColor,
+      size: state.customization.size,
+      pattern: state.customization.pattern,
+      gradient: state.customization.gradientEnabled ? '1' : '0',
+      gradientColor: state.customization.gradientColor
+    });
+    
+    const shareUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      showToast('Shareable link copied to clipboard!', 'success');
+    }).catch(() => {
+      // Fallback
+      const textarea = document.createElement('textarea');
+      textarea.value = shareUrl;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      showToast('Shareable link copied!', 'success');
+    });
+  } catch (error) {
+    console.error('Share link error:', error);
+    showToast('Failed to generate shareable link', 'error');
+  }
+}
+
+function loadFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has('type')) return;
+  
+  try {
+    // Load customization from URL
+    if (params.has('fg')) state.customization.fgColor = params.get('fg');
+    if (params.has('bg')) state.customization.bgColor = params.get('bg');
+    if (params.has('size')) state.customization.size = parseInt(params.get('size'));
+    if (params.has('pattern')) state.customization.pattern = params.get('pattern');
+    if (params.has('gradient')) state.customization.gradientEnabled = params.get('gradient') === '1';
+    if (params.has('gradientColor')) state.customization.gradientColor = params.get('gradientColor');
+    
+    // Update UI
+    document.getElementById('qr-size').value = state.customization.size;
+    document.getElementById('size-value').textContent = `${state.customization.size}px`;
+    document.getElementById('fg-color').value = state.customization.fgColor;
+    document.getElementById('fg-value').textContent = state.customization.fgColor.toUpperCase();
+    document.getElementById('bg-color').value = state.customization.bgColor;
+    document.getElementById('bg-value').textContent = state.customization.bgColor.toUpperCase();
+    document.getElementById('qr-style').value = state.customization.pattern;
+    document.getElementById('gradient-enabled').checked = state.customization.gradientEnabled;
+    document.getElementById('gradient-color').value = state.customization.gradientColor;
+    document.getElementById('gradient-value').textContent = state.customization.gradientColor.toUpperCase();
+    document.getElementById('gradient-controls').style.display = state.customization.gradientEnabled ? 'block' : 'none';
+    
+    // Switch to correct tab
+    const type = params.get('type');
+    state.currentType = type;
+    document.querySelectorAll('.type-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.type === type);
+    });
+    document.querySelectorAll('.form-section').forEach(section => {
+      section.classList.toggle('active', section.id === `section-${type}`);
+    });
+    
+    // Set data
+    const data = params.get('data');
+    setInputForType(type, data);
+    
+    showToast('QR code loaded from link!', 'success');
+  } catch (error) {
+    console.error('URL load error:', error);
   }
 }
 
@@ -803,7 +1291,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initCustomization();
   initAdvancedToggle();
   loadHistory();
+  loadTemplates();
   initKeyboardShortcuts();
+  
+  // Load from URL if parameters present
+  loadFromURL();
   
   // Event Listeners
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
@@ -811,8 +1303,50 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('download-png').addEventListener('click', downloadPNG);
   document.getElementById('download-jpg').addEventListener('click', downloadJPG);
   document.getElementById('download-svg').addEventListener('click', downloadSVG);
+  document.getElementById('download-pdf').addEventListener('click', downloadPDF);
   document.getElementById('copy-btn').addEventListener('click', copyToClipboard);
   document.getElementById('clear-history').addEventListener('click', clearHistory);
+  document.getElementById('save-template-btn').addEventListener('click', saveTemplate);
+  
+  // Share buttons
+  document.getElementById('share-x').addEventListener('click', shareOnX);
+  document.getElementById('share-instagram').addEventListener('click', shareOnInstagram);
+  document.getElementById('share-whatsapp').addEventListener('click', shareOnWhatsApp);
+  document.getElementById('share-link').addEventListener('click', generateShareableLink);
+  
+  // Default template button
+  const defaultTemplateBtn = document.querySelector('.template-default');
+  if (defaultTemplateBtn) {
+    defaultTemplateBtn.addEventListener('click', () => {
+      // Reset to default
+      state.customization = {
+        size: CONFIG.DEFAULT_SIZE,
+        fgColor: CONFIG.DEFAULT_FG,
+        bgColor: CONFIG.DEFAULT_BG,
+        errorLevel: 'H',
+        logo: state.customization.logo,
+        logoSize: 20,
+        pattern: 'classic',
+        gradientEnabled: false,
+        gradientColor: '#667eea'
+      };
+      
+      // Update UI
+      document.getElementById('qr-size').value = CONFIG.DEFAULT_SIZE;
+      document.getElementById('size-value').textContent = `${CONFIG.DEFAULT_SIZE}px`;
+      document.getElementById('fg-color').value = CONFIG.DEFAULT_FG;
+      document.getElementById('fg-value').textContent = CONFIG.DEFAULT_FG.toUpperCase();
+      document.getElementById('bg-color').value = CONFIG.DEFAULT_BG;
+      document.getElementById('bg-value').textContent = CONFIG.DEFAULT_BG.toUpperCase();
+      document.getElementById('logo-size').value = 20;
+      document.getElementById('logo-size-value').textContent = '20%';
+      document.getElementById('qr-style').value = 'classic';
+      document.getElementById('gradient-enabled').checked = false;
+      document.getElementById('gradient-controls').style.display = 'none';
+      
+      showToast('Default template loaded!', 'success');
+    });
+  }
   
   // Focus first input
   document.getElementById('input-url').focus();
