@@ -1,248 +1,356 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-    
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-2Y7WCLB7LV"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-2Y7WCLB7LV');
-</script>
-
-
-    
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abhi's QR Code Generator</title>
-    <style>
-        @keyframes gradientMove {
-            0% {
-                background-position: 0% 50%;
-            }
-            100% {
-                background-position: 200% 50%;
-            }
-        }
-
-        body {
-            font-family: 'Roboto', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
-            background-size: 400% 400%;
-            animation: gradientMove 50s ease infinite;
-            position: relative;
-        }
-
-        body::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('https://www.transparenttextures.com/patterns/arches.png');
-            opacity: 0.5;
-        }
-
-        .container {
-            text-align: center;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 90%;
-            width: 100%;
-            z-index: 1;
-            overflow: hidden;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-sizing: border-box;
-        }
-
-        button {
-            background-color: black;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        button:hover {
-            background-color: #333;
-        }
-
-        #qrcode {
-            display: none;
-            padding: 20px;
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-            margin-bottom: 20px;
-        }
-
-        .download-links {
-            display: none;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        a {
-            text-decoration: none;
-            color: white;
-            background-color: black;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        a:hover {
-            background-color: #333;
-        }
-
-        #error {
-            color: red;
-            margin-bottom: 10px;
-        }
-
-        .qr-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        @media (min-width: 600px) {
-            .container {
-                max-width: 400px;
-            }
-
-            button {
-                width: auto;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Premium QR Code Generator - Create beautiful, customizable QR codes for URLs, WiFi, contacts, and more. Free and easy to use.">
+  <meta name="keywords" content="QR code generator, QR maker, WiFi QR, vCard QR, custom QR code">
+  <meta name="author" content="Abhi">
+  <meta name="theme-color" content="#667eea">
+  
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2Y7WCLB7LV"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-2Y7WCLB7LV');
+  </script>
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="Premium QR Code Generator">
+  <meta property="og:description" content="Create beautiful, customizable QR codes instantly">
+  <meta property="og:type" content="website">
+  
+  <title>Premium QR Generator | Create Beautiful QR Codes</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23667eea' rx='20' width='100' height='100'/><rect fill='white' x='20' y='20' width='25' height='25'/><rect fill='white' x='55' y='20' width='25' height='25'/><rect fill='white' x='20' y='55' width='25' height='25'/><rect fill='white' x='55' y='55' width='12' height='12'/><rect fill='white' x='68' y='68' width='12' height='12'/></svg>">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Skip Link for Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <!-- Animated Background -->
+  <div class="bg-animation" aria-hidden="true"></div>
+  
+  <!-- Theme Toggle -->
+  <div class="theme-toggle">
+    <button id="theme-toggle" class="theme-btn" aria-label="Toggle dark/light theme">
+      <svg class="sun-icon" viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>
+      <svg class="moon-icon" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+    </button>
+  </div>
 
-<div class="container">
-    <h1>Personal QR Generator</h1>
-    <p>Enter a valid URL: </p>
-    <input type="text" id="url" placeholder="Enter URL">
-    <button id="generate">Generate QR Code</button>
-    <div id="error"></div>
-    <div class="qr-container">
-        <div id="qrcode"></div>
-    </div>
-    <div class="download-links">
-        <a id="download-png" download="qrcode.png" style="display: none;">Download PNG</a>
-        <a id="download-jpg" download="qrcode.jpg" style="display: none;">Download JPG</a>
-    </div>
-</div>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo">
+        <div class="logo-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13 2h-2v2h2v2h2v-2h2v-2h-2v-2h2v-2h-2v2h-2v2zm0-2v-2h-2v2h2zm0 4h-2v2h2v-2z"/></svg>
+        </div>
+        <h1 class="app-title">QR Generator Pro</h1>
+      </div>
+      <p class="app-subtitle">Create beautiful, customizable QR codes instantly</p>
+    </header>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script>
-    const generateButton = document.getElementById('generate');
-    const downloadPngLink = document.getElementById('download-png');
-    const downloadJpgLink = document.getElementById('download-jpg');
-    const qrcodeContainer = document.getElementById('qrcode');
-    const errorContainer = document.getElementById('error');
-    const downloadLinks = document.querySelector('.download-links');
-    const urlInput = document.getElementById('url');
+    <!-- Main Content -->
+    <main id="main-content" class="main-content">
+      <!-- Generator Panel -->
+      <section class="glass-card generator-panel" aria-label="QR Code Generator">
+        <!-- QR Type Tabs -->
+        <div class="qr-types">
+          <h3>Select QR Type</h3>
+          <div class="type-tabs" role="tablist">
+            <button class="type-tab active" data-type="url" role="tab" aria-selected="true">
+              <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+              URL
+            </button>
+            <button class="type-tab" data-type="text" role="tab" aria-selected="false">
+              <svg viewBox="0 0 24 24"><path d="M2.5 4v3h5v12h3V7h5V4h-13zm19 5h-9v3h3v7h3v-7h3V9z"/></svg>
+              Text
+            </button>
+            <button class="type-tab" data-type="wifi" role="tab" aria-selected="false">
+              <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+              WiFi
+            </button>
+            <button class="type-tab" data-type="vcard" role="tab" aria-selected="false">
+              <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+              Contact
+            </button>
+            <button class="type-tab" data-type="email" role="tab" aria-selected="false">
+              <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+              Email
+            </button>
+            <button class="type-tab" data-type="phone" role="tab" aria-selected="false">
+              <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+              Phone
+            </button>
+            <button class="type-tab" data-type="sms" role="tab" aria-selected="false">
+              <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/></svg>
+              SMS
+            </button>
+          </div>
+        </div>
 
-    function isValidURL(string) {
-        try {
-            new URL(string);
-            return true;
-        } catch (_) {
-            return false;
-        }
-    }
+        <!-- Form Sections -->
+        <div class="form-sections">
+          <!-- URL Section -->
+          <div id="section-url" class="form-section active">
+            <div class="form-group">
+              <label class="form-label" for="input-url">Website URL</label>
+              <input type="url" id="input-url" class="form-input" placeholder="https://example.com" autocomplete="url">
+              <p class="form-hint">Enter a website URL. Protocol (https://) will be added automatically.</p>
+            </div>
+          </div>
 
-    function generateQRCode(url) {
-        qrcodeContainer.innerHTML = '';
+          <!-- Text Section -->
+          <div id="section-text" class="form-section">
+            <div class="form-group">
+              <label class="form-label" for="input-text">Plain Text</label>
+              <textarea id="input-text" class="form-textarea" placeholder="Enter any text content..." rows="4"></textarea>
+              <p class="form-hint">Any text content up to 4,296 characters.</p>
+            </div>
+          </div>
 
-        const qrCode = new QRCode(qrcodeContainer, {
-            text: url,
-            width: 128,
-            height: 128,
-        });
+          <!-- WiFi Section -->
+          <div id="section-wifi" class="form-section">
+            <div class="form-group">
+              <label class="form-label" for="wifi-ssid">Network Name (SSID)</label>
+              <input type="text" id="wifi-ssid" class="form-input" placeholder="MyWiFiNetwork">
+            </div>
+            <div class="input-row">
+              <div class="form-group">
+                <label class="form-label" for="wifi-password">Password</label>
+                <input type="password" id="wifi-password" class="form-input" placeholder="••••••••">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="wifi-encryption">Security</label>
+                <select id="wifi-encryption" class="form-select">
+                  <option value="WPA">WPA/WPA2</option>
+                  <option value="WEP">WEP</option>
+                  <option value="nopass">None (Open)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">
+                <input type="checkbox" id="wifi-hidden"> Hidden Network
+              </label>
+            </div>
+          </div>
 
-        qrcodeContainer.style.display = 'block';
-        downloadLinks.style.display = 'flex';
+          <!-- vCard Section -->
+          <div id="section-vcard" class="form-section">
+            <div class="input-row">
+              <div class="form-group">
+                <label class="form-label" for="vcard-firstname">First Name</label>
+                <input type="text" id="vcard-firstname" class="form-input" placeholder="John">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="vcard-lastname">Last Name</label>
+                <input type="text" id="vcard-lastname" class="form-input" placeholder="Doe">
+              </div>
+            </div>
+            <div class="input-row">
+              <div class="form-group">
+                <label class="form-label" for="vcard-phone">Phone</label>
+                <input type="tel" id="vcard-phone" class="form-input" placeholder="+1 234 567 8900">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="vcard-email">Email</label>
+                <input type="email" id="vcard-email" class="form-input" placeholder="john@example.com">
+              </div>
+            </div>
+            <div class="input-row">
+              <div class="form-group">
+                <label class="form-label" for="vcard-company">Company</label>
+                <input type="text" id="vcard-company" class="form-input" placeholder="Acme Inc.">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="vcard-title">Job Title</label>
+                <input type="text" id="vcard-title" class="form-input" placeholder="Software Engineer">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="vcard-website">Website</label>
+              <input type="url" id="vcard-website" class="form-input" placeholder="https://johndoe.com">
+            </div>
+          </div>
 
-        setTimeout(() => {
-            const qrCanvas = qrcodeContainer.querySelector('canvas');
-            const pngDataUrl = qrCanvas.toDataURL('image/png');
+          <!-- Email Section -->
+          <div id="section-email" class="form-section">
+            <div class="form-group">
+              <label class="form-label" for="email-address">Email Address</label>
+              <input type="email" id="email-address" class="form-input" placeholder="contact@example.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="email-subject">Subject (Optional)</label>
+              <input type="text" id="email-subject" class="form-input" placeholder="Hello!">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="email-body">Message (Optional)</label>
+              <textarea id="email-body" class="form-textarea" placeholder="Your message here..." rows="3"></textarea>
+            </div>
+          </div>
 
-            downloadPngLink.href = pngDataUrl;
-            downloadPngLink.style.display = 'inline-block';
+          <!-- Phone Section -->
+          <div id="section-phone" class="form-section">
+            <div class="form-group">
+              <label class="form-label" for="phone-number">Phone Number</label>
+              <input type="tel" id="phone-number" class="form-input" placeholder="+1 234 567 8900">
+              <p class="form-hint">Include country code for international numbers.</p>
+            </div>
+          </div>
 
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            const cardWidth = 200;
-            const cardHeight = 200;
-            const radius = 12;
-            canvas.width = cardWidth;
-            canvas.height = cardHeight;
+          <!-- SMS Section -->
+          <div id="section-sms" class="form-section">
+            <div class="form-group">
+              <label class="form-label" for="sms-number">Phone Number</label>
+              <input type="tel" id="sms-number" class="form-input" placeholder="+1 234 567 8900">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="sms-message">Pre-filled Message (Optional)</label>
+              <textarea id="sms-message" class="form-textarea" placeholder="Hey! Check this out..." rows="3"></textarea>
+            </div>
+          </div>
+        </div>
 
-            context.fillStyle = 'white';
-            context.beginPath();
-            context.moveTo(radius, 0);
-            context.arcTo(cardWidth, 0, cardWidth, cardHeight, radius);
-            context.arcTo(cardWidth, cardHeight, 0, cardHeight, radius);
-            context.arcTo(0, cardHeight, 0, 0, radius);
-            context.arcTo(0, 0, cardWidth, 0, radius);
-            context.closePath();
-            context.fill();
+        <!-- Customization Panel -->
+        <div class="customization-panel">
+          <h3>
+            <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            Customize QR Code
+          </h3>
+          <div class="customize-grid">
+            <!-- Size -->
+            <div class="range-group">
+              <div class="range-header">
+                <label class="form-label" for="qr-size">Size</label>
+                <span id="size-value" class="range-value">256px</span>
+              </div>
+              <input type="range" id="qr-size" class="range-slider" min="128" max="512" value="256" step="32">
+            </div>
 
-            context.drawImage(qrCanvas, (cardWidth - 128) / 2, (cardHeight - 128) / 2, 128, 128);
+            <!-- Foreground Color -->
+            <div class="color-picker-group">
+              <label class="form-label">QR Color</label>
+              <div class="color-picker-wrapper">
+                <input type="color" id="fg-color" class="color-picker" value="#1a1a2e">
+                <span id="fg-value" class="color-value">#1A1A2E</span>
+              </div>
+            </div>
 
-            const jpgDataUrl = canvas.toDataURL('image/jpeg');
-            downloadJpgLink.href = jpgDataUrl;
-            downloadJpgLink.style.display = 'inline-block';
-        }, 300);
-    }
+            <!-- Background Color -->
+            <div class="color-picker-group">
+              <label class="form-label">Background</label>
+              <div class="color-picker-wrapper">
+                <input type="color" id="bg-color" class="color-picker" value="#ffffff">
+                <span id="bg-value" class="color-value">#FFFFFF</span>
+              </div>
+            </div>
 
-    function handleGenerateClick() {
-        let url = urlInput.value.trim();
-        errorContainer.textContent = '';
+            <!-- Logo Size -->
+            <div class="range-group">
+              <div class="range-header">
+                <label class="form-label" for="logo-size">Logo Size</label>
+                <span id="logo-size-value" class="range-value">20%</span>
+              </div>
+              <input type="range" id="logo-size" class="range-slider" min="10" max="28" value="20" step="2">
+            </div>
 
-        if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
-            url = 'http://' + url;
-        }
+            <!-- Logo Upload -->
+            <div class="form-group" style="grid-column: span 2;">
+              <label class="form-label">Center Logo (Optional)</label>
+              <div id="logo-upload-area" class="logo-upload-area">
+                <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                <span>Click to upload logo</span>
+                <input type="file" id="logo-input" accept="image/*">
+                <img id="logo-preview" class="logo-preview" src="" alt="Logo preview">
+                <button type="button" id="remove-logo" class="remove-logo" aria-label="Remove logo">&times;</button>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        if (!isValidURL(url)) {
-            errorContainer.textContent = 'Please enter a valid URL.';
-            return;
-        }
+        <!-- Generate Button -->
+        <button id="generate-btn" class="generate-btn">
+          <svg viewBox="0 0 24 24"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13 2h-2v2h2v2h2v-2h2v-2h-2v-2h2v-2h-2v2h-2v2zm0-2v-2h-2v2h2zm0 4h-2v2h2v-2z"/></svg>
+          <span class="btn-text">Generate QR Code</span>
+          <div class="spinner"></div>
+        </button>
+      </section>
 
-        generateQRCode(url);
-    }
+      <!-- Preview Panel -->
+      <aside class="glass-card preview-panel" aria-label="QR Code Preview">
+        <h3>Your QR Code</h3>
+        
+        <!-- QR Display -->
+        <div class="qr-display empty">
+          <div class="qr-placeholder">
+            <svg viewBox="0 0 24 24"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm8 6h2v-2h-2v2zm4-4h2v-2h-2v2zm-4 0h2v-2h-2v2zm2 4h2v-2h-2v2zm2-4h2v-2h-2v2zm4 0h2v-2h-2v2zm0 4h2v-2h-2v2zm-4-2h2v-2h-2v2z"/></svg>
+            <p>Your QR code will appear here</p>
+          </div>
+          <div id="qrcode"></div>
+        </div>
 
-    generateButton.addEventListener('click', handleGenerateClick);
+        <!-- Download Actions -->
+        <div class="download-actions">
+          <button id="download-png" class="download-btn" disabled>
+            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            <span>PNG</span>
+          </button>
+          <button id="download-jpg" class="download-btn" disabled>
+            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            <span>JPG</span>
+          </button>
+          <button id="download-svg" class="download-btn" disabled>
+            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            <span>SVG</span>
+          </button>
+          <button id="copy-btn" class="download-btn copy-btn" disabled>
+            <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            <span class="btn-text">Copy</span>
+          </button>
+        </div>
 
-    urlInput.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            handleGenerateClick();
-        }
-    });
-</script>
+        <!-- History Panel -->
+        <div class="history-panel">
+          <div class="history-header">
+            <h3>
+              <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+              Recent QR Codes
+            </h3>
+            <button id="clear-history" class="clear-history">Clear All</button>
+          </div>
+          <div id="history-list" class="history-list">
+            <div class="history-empty">No QR codes generated yet</div>
+          </div>
+        </div>
+      </aside>
+    </main>
 
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Built with ❤️ by <a href="https://github.com/abhir" target="_blank" rel="noopener">Abhi</a> • Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to generate</p>
+    </footer>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- External Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  
+  <!-- App Script -->
+  <script src="app.js"></script>
 </body>
 </html>
