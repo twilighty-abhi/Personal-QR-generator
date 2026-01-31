@@ -1032,17 +1032,21 @@ body {
 
 .share-buttons {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem;
+  grid-template-columns: 2fr 1fr;
+  gap: 0.75rem;
 }
 
 .share-btn {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
   padding: 0.875rem;
-  font-size: 0;
+  font-size: 0.85rem;
+  font-weight: 800;
   font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   background: var(--btn-secondary-bg);
   color: var(--text-primary);
   border: var(--border-width) solid var(--border-color);
@@ -1051,44 +1055,28 @@ body {
   transition: all var(--transition-fast);
   box-shadow: var(--shadow-brutal-sm);
   min-height: 48px;
-  min-width: 48px;
 }
 
 .share-btn svg {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   fill: var(--text-primary);
 }
 
-.share-btn:nth-child(1):hover {
-  background: #1DA1F2;
-  border-color: #1DA1F2;
+.share-main {
+  background: var(--neo-green);
 }
 
-.share-btn:nth-child(1):hover svg {
-  fill: white;
+.share-main:hover {
+  background: var(--neo-mint);
+}
+
+.share-btn:nth-child(2) {
+  background: var(--neo-orange);
 }
 
 .share-btn:nth-child(2):hover {
-  background: #4267B2;
-  border-color: #4267B2;
-}
-
-.share-btn:nth-child(2):hover svg {
-  fill: white;
-}
-
-.share-btn:nth-child(3):hover {
-  background: #25D366;
-  border-color: #25D366;
-}
-
-.share-btn:nth-child(3):hover svg {
-  fill: white;
-}
-
-.share-btn:nth-child(4):hover {
-  background: var(--neo-orange);
+  background: var(--neo-yellow);
 }
 
 .share-btn:hover {
@@ -1111,6 +1099,8 @@ body {
 /* Templates Panel */
 .templates-panel {
   margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px dashed var(--border-color);
 }
 
 .templates-header {

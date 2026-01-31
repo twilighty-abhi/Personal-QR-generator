@@ -825,7 +825,7 @@ async function copyToClipboard() {
 // Sharing Functions
 // ============================================
 
-async function shareOnX() {
+async function shareQRCode() {
   const canvas = document.querySelector('#qrcode canvas');
   if (!canvas) {
     showToast('Generate a QR code first!', 'error');
@@ -833,7 +833,7 @@ async function shareOnX() {
   }
   
   try {
-    // Try Web Share API with image
+    // Try Web Share API with image (native share menu)
     if (navigator.share && navigator.canShare) {
       const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
       const file = new File([blob], 'qrcode.png', { type: 'image/png' });
@@ -850,91 +850,17 @@ async function shareOnX() {
       }
     }
     
-    // Fallback: download and open X
+    // Fallback: auto-download and show instructions
     downloadPNG();
-    const text = 'Check out my custom QR code created with QR Generator Pro!';
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
-    setTimeout(() => {
-      window.open(url, '_blank', 'width=600,height=400');
-      showToast('QR downloaded! Upload it to your X post.', 'success');
-    }, 500);
+    showToast('QR downloaded! Share it from your files.', 'success');
   } catch (error) {
-    console.error('Share failed:', error);
-    showToast('Download the QR and share manually on X', 'error');
-  }
-}
-
-async function shareOnInstagram() {
-  const canvas = document.querySelector('#qrcode canvas');
-  if (!canvas) {
-    showToast('Generate a QR code first!', 'error');
-    return;
-  }
-  
-  try {
-    // Try Web Share API (works on mobile)
-    if (navigator.share && navigator.canShare) {
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-      const file = new File([blob], 'qrcode.png', { type: 'image/png' });
-      const shareData = {
-        title: 'QR Code',
-        text: 'Check out my custom QR code!',
-        files: [file]
-      };
-      
-      if (navigator.canShare(shareData)) {
-        await navigator.share(shareData);
-        showToast('Shared successfully!', 'success');
-        return;
-      }
+    if (error.name === 'AbortError') {
+      // User cancelled the share
+      return;
     }
-    
-    // Fallback: auto-download
-    downloadPNG();
-    showToast('QR downloaded! Now share it on Instagram from your gallery.', 'success');
-  } catch (error) {
     console.error('Share failed:', error);
     downloadPNG();
-    showToast('QR downloaded! Share it on Instagram from your gallery.', 'info');
-  }
-}
-
-async function shareOnWhatsApp() {
-  const canvas = document.querySelector('#qrcode canvas');
-  if (!canvas) {
-    showToast('Generate a QR code first!', 'error');
-    return;
-  }
-  
-  try {
-    // Try Web Share API with image
-    if (navigator.share && navigator.canShare) {
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-      const file = new File([blob], 'qrcode.png', { type: 'image/png' });
-      const shareData = {
-        title: 'QR Code',
-        text: 'Check out my custom QR code!',
-        files: [file]
-      };
-      
-      if (navigator.canShare(shareData)) {
-        await navigator.share(shareData);
-        showToast('Shared successfully!', 'success');
-        return;
-      }
-    }
-    
-    // Fallback: download and open WhatsApp Web
-    downloadPNG();
-    const text = 'Check out my custom QR code!';
-    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-    setTimeout(() => {
-      window.open(url, '_blank', 'width=600,height=400');
-      showToast('QR downloaded! Attach it in WhatsApp.', 'success');
-    }, 500);
-  } catch (error) {
-    console.error('Share failed:', error);
-    showToast('Download the QR and share manually on WhatsApp', 'error');
+    showToast('QR downloaded! Share it manually.', 'info');
   }
 }
 
@@ -1309,9 +1235,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('save-template-btn').addEventListener('click', saveTemplate);
   
   // Share buttons
-  document.getElementById('share-x').addEventListener('click', shareOnX);
-  document.getElementById('share-instagram').addEventListener('click', shareOnInstagram);
-  document.getElementById('share-whatsapp').addEventListener('click', shareOnWhatsApp);
+  document.getElementById('share-qr').addEventListener('click', shareQRCode);
   document.getElementById('share-link').addEventListener('click', generateShareableLink);
   
   // Default template button
