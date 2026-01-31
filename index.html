@@ -226,56 +226,59 @@
 
         <!-- Customization Panel -->
         <div class="customization-panel">
-          <h3>
+          <button type="button" id="advanced-toggle" class="advanced-toggle">
             <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
-            Customize QR Code
-          </h3>
-          <div class="customize-grid">
-            <!-- Size -->
-            <div class="range-group">
-              <div class="range-header">
-                <label class="form-label" for="qr-size">Size</label>
-                <span id="size-value" class="range-value">256px</span>
+            <span>Advanced Settings</span>
+            <svg class="chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+          </button>
+          <div id="advanced-content" class="advanced-content">
+            <div class="customize-grid">
+              <!-- Size -->
+              <div class="range-group">
+                <div class="range-header">
+                  <label class="form-label" for="qr-size">Size</label>
+                  <span id="size-value" class="range-value">256px</span>
+                </div>
+                <input type="range" id="qr-size" class="range-slider" min="128" max="512" value="256" step="32">
               </div>
-              <input type="range" id="qr-size" class="range-slider" min="128" max="512" value="256" step="32">
-            </div>
 
-            <!-- Foreground Color -->
-            <div class="color-picker-group">
-              <label class="form-label">QR Color</label>
-              <div class="color-picker-wrapper">
-                <input type="color" id="fg-color" class="color-picker" value="#1a1a2e">
-                <span id="fg-value" class="color-value">#1A1A2E</span>
+              <!-- Foreground Color -->
+              <div class="color-picker-group">
+                <label class="form-label">QR Color</label>
+                <div class="color-picker-wrapper">
+                  <input type="color" id="fg-color" class="color-picker" value="#1a1a2e">
+                  <span id="fg-value" class="color-value">#1A1A2E</span>
+                </div>
               </div>
-            </div>
 
-            <!-- Background Color -->
-            <div class="color-picker-group">
-              <label class="form-label">Background</label>
-              <div class="color-picker-wrapper">
-                <input type="color" id="bg-color" class="color-picker" value="#ffffff">
-                <span id="bg-value" class="color-value">#FFFFFF</span>
+              <!-- Background Color -->
+              <div class="color-picker-group">
+                <label class="form-label">Background</label>
+                <div class="color-picker-wrapper">
+                  <input type="color" id="bg-color" class="color-picker" value="#ffffff">
+                  <span id="bg-value" class="color-value">#FFFFFF</span>
+                </div>
               </div>
-            </div>
 
-            <!-- Logo Size -->
-            <div class="range-group">
-              <div class="range-header">
-                <label class="form-label" for="logo-size">Logo Size</label>
-                <span id="logo-size-value" class="range-value">20%</span>
+              <!-- Logo Size -->
+              <div class="range-group">
+                <div class="range-header">
+                  <label class="form-label" for="logo-size">Logo Size</label>
+                  <span id="logo-size-value" class="range-value">20%</span>
+                </div>
+                <input type="range" id="logo-size" class="range-slider" min="10" max="28" value="20" step="2">
               </div>
-              <input type="range" id="logo-size" class="range-slider" min="10" max="28" value="20" step="2">
-            </div>
 
-            <!-- Logo Upload -->
-            <div class="form-group" style="grid-column: span 2;">
-              <label class="form-label">Center Logo (Optional)</label>
-              <div id="logo-upload-area" class="logo-upload-area">
-                <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-                <span>Click to upload logo</span>
-                <input type="file" id="logo-input" accept="image/*">
-                <img id="logo-preview" class="logo-preview" src="" alt="Logo preview">
-                <button type="button" id="remove-logo" class="remove-logo" aria-label="Remove logo">&times;</button>
+              <!-- Logo Upload -->
+              <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label">Center Logo (Optional)</label>
+                <div id="logo-upload-area" class="logo-upload-area">
+                  <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                  <span>Click to upload logo</span>
+                  <input type="file" id="logo-input" accept="image/*">
+                  <img id="logo-preview" class="logo-preview" src="" alt="Logo preview">
+                  <button type="button" id="remove-logo" class="remove-logo" aria-label="Remove logo">&times;</button>
+                </div>
               </div>
             </div>
           </div>

@@ -320,22 +320,37 @@ function generateQRCode() {
   const qrContainer = document.getElementById('qrcode');
   qrContainer.innerHTML = '';
   
+  // Determine appropriate size based on viewport
+  let qrSize = state.customization.size;
+  const isMobile = window.innerWidth <= 480;
+  if (isMobile && qrSize > 220) {
+    qrSize = 220; // Cap size on mobile
+  }
+  
   // Generate QR code
   setTimeout(() => {
     try {
       // Create QR code with canvas mode
       state.qrCode = new QRCode(qrContainer, {
         text: data,
-        width: state.customization.size,
-        height: state.customization.size,
+        width: qrSize,
+        height: qrSize,
         colorDark: state.customization.fgColor,
         colorLight: state.customization.bgColor,
         correctLevel: QRCode.CorrectLevel[state.customization.errorLevel]
       });
       
+      // QRCode.js creates both canvas and img - hide the img to prevent duplicates
+      setTimeout(() => {
+        const imgEl = qrContainer.querySelector('img');
+        if (imgEl) {
+          imgEl.style.display = 'none';
+        }
+      }, 100);
+      
       // Add logo if present - wait for QR to render fully
       if (state.customization.logo) {
-        setTimeout(() => addLogoToQR(), 300);
+        setTimeout(() => addLogoToQR(qrSize), 300);
       }
       
       // Update UI
@@ -359,9 +374,11 @@ function generateQRCode() {
   }, 300);
 }
 
-function addLogoToQR() {
+function addLogoToQR(qrSize) {
   const qrContainer = document.getElementById('qrcode');
   if (!qrContainer || !state.customization.logo) return;
+  
+  const size = qrSize || state.customization.size;
   
   // QRCode.js creates both canvas and img - we need the canvas
   let canvas = qrContainer.querySelector('canvas');
@@ -370,10 +387,10 @@ function addLogoToQR() {
   // If only img exists, we need to draw it to a canvas first
   if (!canvas && img) {
     canvas = document.createElement('canvas');
-    canvas.width = state.customization.size;
-    canvas.height = state.customization.size;
+    canvas.width = size;
+    canvas.height = size;
     const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, state.customization.size, state.customization.size);
+    ctx.drawImage(img, 0, 0, size, size);
     img.style.display = 'none';
     qrContainer.appendChild(canvas);
   }
@@ -389,9 +406,9 @@ function addLogoToQR() {
   
   logo.onload = () => {
     const logoSizePercent = state.customization.logoSize / 100;
-    const logoSize = Math.floor(state.customization.size * logoSizePercent);
-    const x = Math.floor((state.customization.size - logoSize) / 2);
-    const y = Math.floor((state.customization.size - logoSize) / 2);
+    const logoSize = Math.floor(size * logoSizePercent);
+    const x = Math.floor((size - logoSize) / 2);
+    const y = Math.floor((size - logoSize) / 2);
     const padding = 8;
     const borderRadius = 10;
     
@@ -561,6 +578,16 @@ function addToHistory() {
   const canvas = document.querySelector('#qrcode canvas');
   if (!canvas) return;
   
+  // Check for duplicate - don't add if same data already exists
+  const existingIndex = state.history.findIndex(h => 
+    h.data === state.currentData.data && h.type === state.currentData.type
+  );
+  
+  // If duplicate exists, remove it (we'll add fresh one at top)
+  if (existingIndex !== -1) {
+    state.history.splice(existingIndex, 1);
+  }
+  
   const historyItem = {
     id: Date.now(),
     type: state.currentData.type,
@@ -623,7 +650,6 @@ function restoreFromHistory(id) {
     state.customization.size = item.customization.size || CONFIG.DEFAULT_SIZE;
     state.customization.fgColor = item.customization.fgColor || CONFIG.DEFAULT_FG;
     state.customization.bgColor = item.customization.bgColor || CONFIG.DEFAULT_BG;
-    state.customization.errorLevel = item.customization.errorLevel || 'M';
     
     // Update UI
     document.getElementById('qr-size').value = state.customization.size;
@@ -632,7 +658,6 @@ function restoreFromHistory(id) {
     document.getElementById('fg-value').textContent = state.customization.fgColor.toUpperCase();
     document.getElementById('bg-color').value = state.customization.bgColor;
     document.getElementById('bg-value').textContent = state.customization.bgColor.toUpperCase();
-    document.getElementById('error-level').value = state.customization.errorLevel;
   }
   
   // Set input value based on type
@@ -774,6 +799,22 @@ function initKeyboardShortcuts() {
 }
 
 // ============================================
+// Advanced Settings Toggle
+// ============================================
+
+function initAdvancedToggle() {
+  const toggle = document.getElementById('advanced-toggle');
+  const content = document.getElementById('advanced-content');
+  
+  if (toggle && content) {
+    toggle.addEventListener('click', () => {
+      toggle.classList.toggle('open');
+      content.classList.toggle('open');
+    });
+  }
+}
+
+// ============================================
 // Initialization
 // ============================================
 
@@ -781,6 +822,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initTabs();
   initCustomization();
+  initAdvancedToggle();
   loadHistory();
   initKeyboardShortcuts();
   
