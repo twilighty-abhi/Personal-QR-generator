@@ -649,7 +649,7 @@ function downloadPNG() {
   
   const link = document.createElement('a');
   link.download = `qrcode-${Date.now()}.png`;
-  link.href = canvas.toDataURL('image/png');
+  link.href = canvas.toDataURL('image/png', 1.0);
   link.click();
   
   showToast('PNG downloaded!', 'success');
@@ -665,14 +665,15 @@ function downloadJPG() {
   newCanvas.width = canvas.width + padding * 2;
   newCanvas.height = canvas.height + padding * 2;
   
-  const ctx = newCanvas.getContext('2d');
+  const ctx = newCanvas.getContext('2d', { alpha: false });
+  ctx.imageSmoothingEnabled = false;
   ctx.fillStyle = state.customization.bgColor;
   ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
   ctx.drawImage(canvas, padding, padding);
   
   const link = document.createElement('a');
   link.download = `qrcode-${Date.now()}.jpg`;
-  link.href = newCanvas.toDataURL('image/jpeg', 0.95);
+  link.href = newCanvas.toDataURL('image/jpeg', 1.0);
   link.click();
   
   showToast('JPG downloaded!', 'success');
@@ -789,9 +790,38 @@ async function shareQRCode() {
   }
   
   try {
-    // Try Web Share API with image (native share menu)
+    // Create a high-resolution version for sharing (2x upscale)
+    const shareCanvas = document.createElement('canvas');
+    const scale = 2; // 2x resolution for better quality
+    const padding = 40; // Add padding for better scanability
+    
+    shareCanvas.width = (canvas.width + padding * 2) * scale;
+    shareCanvas.height = (canvas.height + padding * 2) * scale;
+    
+    const ctx = shareCanvas.getContext('2d', { alpha: false });
+    
+    // Use high quality settings
+    ctx.imageSmoothingEnabled = false; // Keep QR sharp, no smoothing
+    ctx.imageSmoothingQuality = 'high';
+    
+    // Draw background with padding
+    ctx.fillStyle = state.customization.bgColor;
+    ctx.fillRect(0, 0, shareCanvas.width, shareCanvas.height);
+    
+    // Draw QR code at 2x scale with padding
+    ctx.drawImage(
+      canvas, 
+      padding * scale, 
+      padding * scale, 
+      canvas.width * scale, 
+      canvas.height * scale
+    );
+    
+    // Try Web Share API with high-quality image
     if (navigator.share && navigator.canShare) {
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      const blob = await new Promise(resolve => {
+        shareCanvas.toBlob(resolve, 'image/png', 1.0); // Maximum quality
+      });
       const file = new File([blob], 'qrcode.png', { type: 'image/png' });
       const shareData = {
         title: 'QR Code',
@@ -806,9 +836,12 @@ async function shareQRCode() {
       }
     }
     
-    // Fallback: auto-download and show instructions
-    downloadPNG();
-    showToast('QR downloaded! Share it from your files.', 'success');
+    // Fallback: download high-quality version
+    const link = document.createElement('a');
+    link.download = `qrcode-hq-${Date.now()}.png`;
+    link.href = shareCanvas.toDataURL('image/png', 1.0);
+    link.click();
+    showToast('High-quality QR downloaded! Share it from your files.', 'success');
   } catch (error) {
     if (error.name === 'AbortError') {
       // User cancelled the share
